@@ -90,7 +90,7 @@ class NeuralNet (object):
                     self.layers.append(ReLU(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
             else:
-                print ("ERROR: no layer with",self.hidden_type,"exist!")
+                print ("ERROR: no layer with"+str(self.hidden_type)+"exist!")
                 exit(1)
         # add output layer
         if self.out_type == "Softmax":
@@ -112,7 +112,7 @@ class NeuralNet (object):
             self.layers.append(ReLU(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
         else:
-            print ("ERROR: no layer with",self.out_type,"exist!")
+            print ("ERROR: no layer with"+str(self.out_type)+"exist!")
             exit(1)
         #save number of layers
         self.Nlayers = Nlayers

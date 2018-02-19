@@ -49,14 +49,14 @@ class Linear (Layer):
 
     def set_biases(self, biases):
         """
-        Set biases of linear layer equal to array biases
+        Set biases of linear layer equal to old biases
         """
         self.biases = biases
         self.biases_old = biases
 
     def set_weights(self, weights):
         """
-        Set weights of linear layer equal to array weights
+        Set weights of linear layer equal to old weights
         """
         self.weights = weights
         self.weights_old = weights
