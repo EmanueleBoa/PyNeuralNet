@@ -334,6 +334,46 @@ class NeuralNet (object):
         return score
 
 
+    def trainAndValidate(self, dataset, target, fraction):
+        """
+        Method that trains and tests the network on
+        the given dataset with corresponding target
+        """
+        if fraction>1.0 or fraction<0.0:
+            print("ERROR: fraction must be a float between 0 and 1!")
+            exit(1)
+        # build traing and validation sets from dataset
+        training_set, training_target, validation_set, validation_target = \
+        shuffleAndSplitDT(dataset, target, fraction)
+        # train
+        error_list = self.trainOnDataset(training_set, training_target)
+        # score
+        training_score = self.validate(training_set, training_target)
+        validation_score = self.validate(validation_set, validation_target)
+        if self.return_error:
+            return error_list, training_score, validation_score
+        return training_score, validation_score
+
+    def cross_validation(self, dataset, target, N):
+        """
+        Method that computes the accuracy of the
+        network with the cross-validation procedure
+        """
+        fraction = 1.0-1.0/N
+        score = 0.0
+        for i in range(N):
+            # build traing and validation sets from dataset
+            training_set, training_target, validation_set, validation_target = \
+            shuffleAndSplitDT(dataset, target, fraction)
+            # train
+            self.trainOnDataset(training_set, training_target)
+            # add score
+            score += self.validate(validation_set, validation_target)
+        # compute average score
+        score = score/N
+        return score
+
+
     def activate(self, input_vector):
         """
         Method that returns the network output
@@ -479,3 +519,46 @@ class NeuralNet (object):
             self.layers[i].set_weights(weights)
         # close input file
         file_in.close()
+
+
+def shuffleDT(dataset, target):
+    """
+    Function to randomly shuffle a dataset
+    and corresponding target
+    """
+    ntrain = len(dataset)
+    shuffled_dataset = []
+    shuffled_target = []
+    random_index = np.random.permutation(ntrain)
+    for n in range(ntrain):
+        k = random_index[n]
+        shuffled_dataset.append(dataset[k])
+        shuffled_target.append(target[k])
+    shuffled_dataset = np.array(shuffled_dataset)
+    shuffled_target = np.array(shuffled_target)
+    return shuffled_dataset, shuffled_target
+
+def shuffleAndSplitDT(dataset, target, fraction):
+    """
+    Function to randomly shuffle a dataset
+    and corresponding target and split them
+    into a training and a validation set
+    """
+    ndata = len(dataset)
+    shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
+    ntrain = int(ndata*fraction)
+    training_set = []
+    training_target = []
+    validation_set = []
+    validation_target = []
+    for i in range(ntrain):
+        training_set.append(shuffled_dataset[i])
+        training_target.append(shuffled_target[i])
+    for i in range(ntrain, ndata):
+        validation_set.append(shuffled_dataset[i])
+        validation_target.append(shuffled_target[i])
+    training_set = np.array(training_set)
+    training_target = np.array(training_target)
+    validation_set = np.array(validation_set)
+    validation_target = np.array(validation_target)
+    return training_set, training_target, validation_set, validation_target
