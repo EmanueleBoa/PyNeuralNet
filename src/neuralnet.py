@@ -13,7 +13,7 @@ class NeuralNet (object):
     """
     A class to represent a feed-forward neural network
     """
-    def __init__(self, *d, **types):
+    def __init__(self):
         self.layers = []
         self.Nlayers = 0
         self.out_type = None
@@ -119,6 +119,7 @@ class NeuralNet (object):
         if self.verbose:
             self.print_network_structure()
 
+
     def add_layer(self, type, dim):
         """
         Method that adds to the network a layer
@@ -183,12 +184,14 @@ class NeuralNet (object):
             print ("ERROR: no such layer available!")
             exit(1)
 
+
     def set_scope(self, scope):
         if scope=="Classification" or scope=="Regression":
             self.scope = scope
         else:
             print ("Error: scope must be Classification or Regression!")
             exit(1)
+
 
     def print_network_structure(self):
         """
@@ -269,46 +272,82 @@ class NeuralNet (object):
             self.layers[i].update_delta_weights(self.layers[i-1])
 
 
+    def batch_train(self, batch, target):
+        # batch size
+        nbatch = len(batch)
+        # error
+        error = 0.0
+        for n in range(nbatch):
+            # produce output
+            self.forward_propagation(batch[n])
+            # produce target output
+            if self.scope=="Classification":
+                t = self.layers[self.Nlayers-1].build_target(target[n])
+            else:
+                t = target[n]
+            # compute error
+            error += self.layers[self.Nlayers-1].compute_error(t)
+            # back propagate the error
+            self.back_propagation(t)
+        # update weights (batch gradient-descent+momentum)
+        for i in range(1,self.Nlayers):
+            self.layers[i].gradient_descent(self.learning_rate, \
+            self.momentum, nbatch, self.weight_decay)
+        #add error to error_list
+        error /= nbatch
+        self.error_list.append(error)
+
+
+    def vector_train(self, vector, target):
+        # produce output
+        self.forward_propagation(vector)
+        # produce target output
+        if self.scope=="Classification":
+            t = self.layers[self.Nlayers-1].build_target(target)
+        else:
+            t = target
+        # compute error
+        error = self.layers[self.Nlayers-1].compute_error(t)
+        # back propagate the error
+        self.back_propagation(t)
+        # update weights (gradient-descent+momentum)
+        for i in range(1,self.Nlayers):
+            self.layers[i].gradient_descent(self.learning_rate, \
+            self.momentum, self.batchsize, self.weight_decay)
+        #add error to error_list
+        self.error_list.append(error)
+
+
     def trainOnDataset(self, dataset, target):
         """
-        Method that trains the network on the given
-        training dataset with corresponding target
+        Method that trains the network for classification
+        on the given training dataset with corresponding target
         """
         # dimension of training dataset
         ntrain = len(dataset)
-        # build array of random indeces
-        random_index = np.random.permutation(ntrain)
-        # counter
-        count = 0
-        # error
-        error = 0.0
-        # start training
-        for rounds in range(self.training_rounds):
-            for n in range(ntrain):
-                k = random_index[n]
-                k = n
-                # produce output
-                self.forward_propagation(dataset[k])
-                # produce target output
-                if self.scope=="Classification":
-                    t = self.layers[self.Nlayers-1].build_target(target[k])
-                else:
-                    t = target[k]
-                # compute error
-                error += self.layers[self.Nlayers-1].compute_error(t)
-                # back propagate the error
-                self.back_propagation(t)
-                # update weights (batch gradient-descent+momentum)
-                if (n+1)%self.batchsize == 0:
-                    # update weights
-                    for i in range(1,self.Nlayers):
-                        self.layers[i].gradient_descent(self.learning_rate, \
-                        self.momentum, self.batchsize, self.weight_decay)
-                    #add error to error_list
-                    error /= self.batchsize
-                    self.error_list.append(error)
-                    error = 0.0
-                    count += 1
+        # shuffle dataset
+        shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
+
+        # Sequential training
+        if self.batchsize == 1:
+            for rounds in range(self.training_rounds):
+                for n in range(ntrain):
+                    self.vector_train(shuffled_dataset[n],shuffled_target[n])
+
+        # Batch training
+        else:
+            # dimension of training dataset
+            ntrain = len(dataset)
+            # number of batches
+            Nbatches = int(np.rint(ntrain/self.batchsize))
+            # split dataset into batches
+            newset = np.array_split(shuffled_dataset, Nbatches)
+            newtarget = np.array_split(shuffled_target, Nbatches)
+            # start training
+            for rounds in range(self.training_rounds):
+                for n in range(Nbatches):
+                    self.batch_train(newset[n],newtarget[n])
+
         if self.return_error:
             return self.error_list
 
@@ -353,6 +392,7 @@ class NeuralNet (object):
         if self.return_error:
             return error_list, training_score, validation_score
         return training_score, validation_score
+
 
     def cross_validation(self, dataset, target, N):
         """
