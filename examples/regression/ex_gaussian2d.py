@@ -1,12 +1,13 @@
 """
 Example: A Neural Network to approximate
-a gaussian in 1 dimension (Regression)
+a gaussian in 2 dimensions (Regression)
 """
 
 import numpy as np
 import math as m
 import random as r
 from neuralnet import NeuralNet
+
 
 """
 Create training set with corresponding target
@@ -16,11 +17,14 @@ training_target = []
 
 for i in range(10000):
     x = r.uniform(-5.0, 5.0)
-    z = m.exp(-0.5*x*x)/m.sqrt(2.0*m.pi)
-    training_set.append([x])
+    y = r.uniform(-5.0, 5.0)
+    vector = [x,y]
+    z = m.exp(-0.5*(x*x+y*y))/2.0*m.pi
+    training_set.append(vector)
     training_target.append(z)
 training_set = np.array(training_set)
 training_target = np.array(training_target)
+
 
 """
 Create validation set with corresponding target
@@ -30,9 +34,12 @@ validation_target = []
 
 for i in range(100):
     x = -5.0+i*0.1
-    z = m.exp(-0.5*x*x)/m.sqrt(2.0*m.pi)
-    validation_set.append([x])
-    validation_target.append(z)
+    for j in range(100):
+        y = -5.0+j*0.1
+        vector = [x,y]
+        z = m.exp(-0.5*(x*x+y*y))/2.0*m.pi
+        validation_set.append(vector)
+        validation_target.append(z)
 validation_set = np.array(validation_set)
 validation_target = np.array(validation_target)
 
@@ -40,14 +47,15 @@ validation_target = np.array(validation_target)
 Build Neural network
 """
 net = NeuralNet()
-net.build_network(1,4,1, hidden_type="Sigmoid", out_type="Linear", scope="Regression", verbose=True)
+net.build_network(2,8,8,1, hidden_type="Sigmoid", out_type="Linear", scope="Regression", verbose=True)
 
 """
 Another way of building the same network
 """
 #net = NeuralNet()
-#net.add_layer("Input",1)
-#net.add_layer("Sigmoid",4)
+#net.add_layer("Input",2)
+#net.add_layer("Sigmoid",8)
+#net.add_layer("Sigmoid",8)
 #net.add_layer("Linear",1)
 #net.set_scope("Regression")
 #net.print_network_structure()
@@ -57,7 +65,7 @@ Training
 """
 # set parameters for training
 net.set_training_param(learning_rate=0.5, momentum=0.9, return_error=True, batchsize=10, training_rounds=10)
-#train
+# train
 train_error = net.trainOnDataset(training_set, training_target)
 
 """
@@ -79,7 +87,7 @@ target output for validation set on a file
 """
 file_out = open("results.dat",'w')
 for i in range(len(out)):
-    file_out.write(str(validation_set[i][0])+" "+str(out[i])+\
+    file_out.write(str(validation_set[i][0])+" "+str(validation_set[i][1])+" "+str(out[i])+\
     " "+str(validation_target[i])+"\n")
 file_out.close()
 
