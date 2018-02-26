@@ -1,2 +1,2 @@
 # PyNeuralNet
-A python library for feed-forward Neural Networks
+A python library for Artificial Neural Networks
