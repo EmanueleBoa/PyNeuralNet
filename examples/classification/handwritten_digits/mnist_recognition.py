@@ -4,7 +4,7 @@ from the MNIST data set (available at http://yann.lecun.com/exdb/mnist/)
 (Classification)
 
 In this example a neural network with one hidden layer is used for
-classifying hendwritten digits (numbers beteen 0 and 9).
+classifying handwritten digits (numbers beteen 0 and 9).
 With such a neural network you should get an accuracy of about 95%.
 To increase the accuracy you may try to increase the dimension of
 the hidden layer, adding other hidden layers, and also increassing
