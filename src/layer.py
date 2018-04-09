@@ -91,8 +91,6 @@ class Linear (Layer):
         # delta weights
         self.delta_weights += np.outer(self.deltas,previous_layer.units)
 
-
-
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
         Update wheights and biases with batch gradient descent (with momentum term)
@@ -117,14 +115,6 @@ class Linear (Layer):
         Return class with highest probability
         """
         return np.argmax(self.units)
-
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        target = np.zeros(self.n)
-        target[label] = 1.0
-        return target
 
     def compute_error(self, target):
         """
@@ -208,13 +198,6 @@ class Softmax (Layer):
         """
         return np.argmax(self.units)
 
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        target = np.zeros(self.n)
-        target[label] = 1.0
-        return target
 
     def compute_error(self, target):
         """
@@ -303,17 +286,6 @@ class Tanh (Layer):
             else:
                 return 0
 
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        if self.n>1:
-            target = np.zeros(self.n)
-            target[label] = 1.0
-        else:
-            target = label
-        return target
-
     def compute_error(self, target):
         """
         Return error (sum-of-squares)
@@ -400,17 +372,6 @@ class Sigmoid (Layer):
         else:
             return np.rint(self.units[0])
 
-
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        if self.n>1:
-            target = np.zeros(self.n)
-            target[label] = 1.0
-        else:
-            target = label
-        return target
 
     def compute_error(self, target):
         """
@@ -502,18 +463,6 @@ class SoftSign (Layer):
             else:
                 return 0
 
-
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        if self.n>1:
-            target = np.zeros(self.n)
-            target[label] = 1.0
-        else:
-            target = label
-        return target
-
     def compute_error(self, target):
         """
         Return error (sum-of-squares)
@@ -603,18 +552,6 @@ class ReLU (Layer):
                 return 1
             else:
                 return 0
-
-
-    def build_target(self, label):
-        """
-        Return array with targets for classification
-        """
-        if self.n>1:
-            target = np.zeros(self.n)
-            target[label] = 1.0
-        else:
-            target = label
-        return target
 
     def compute_error(self, target):
         """

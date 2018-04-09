@@ -280,15 +280,10 @@ class NeuralNet (object):
         for n in range(nbatch):
             # produce output
             self.forward_propagation(batch[n])
-            # produce target output
-            if self.scope=="Classification":
-                t = self.layers[self.Nlayers-1].build_target(target[n])
-            else:
-                t = target[n]
             # compute error
-            error += self.layers[self.Nlayers-1].compute_error(t)
+            error += self.layers[self.Nlayers-1].compute_error(target[n])
             # back propagate the error
-            self.back_propagation(t)
+            self.back_propagation(target[n])
         # update weights (batch gradient-descent+momentum)
         for i in range(1,self.Nlayers):
             self.layers[i].gradient_descent(self.learning_rate, \
@@ -301,15 +296,10 @@ class NeuralNet (object):
     def vector_train(self, vector, target):
         # produce output
         self.forward_propagation(vector)
-        # produce target output
-        if self.scope=="Classification":
-            t = self.layers[self.Nlayers-1].build_target(target)
-        else:
-            t = target
         # compute error
-        error = self.layers[self.Nlayers-1].compute_error(t)
+        error = self.layers[self.Nlayers-1].compute_error(target)
         # back propagate the error
-        self.back_propagation(t)
+        self.back_propagation(target)
         # update weights (gradient-descent+momentum)
         for i in range(1,self.Nlayers):
             self.layers[i].gradient_descent(self.learning_rate, \
@@ -323,14 +313,19 @@ class NeuralNet (object):
         Method that trains the network for classification
         on the given training dataset with corresponding target
         """
+        # build target for classification if needed
+        if self.scope=="Classification":
+            nout = self.layers[self.Nlayers-1].n
+            t = build_cl_target(target, nout)
+        else:
+            t = target
         # dimension of training dataset
         ntrain = len(dataset)
-        # shuffle dataset
-        shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
-
         # Sequential training
         if self.batchsize == 1:
             for rounds in range(self.training_rounds):
+                # shuffle dataset
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
                 for n in range(ntrain):
                     self.vector_train(shuffled_dataset[n],shuffled_target[n])
 
@@ -340,11 +335,13 @@ class NeuralNet (object):
             ntrain = len(dataset)
             # number of batches
             Nbatches = int(np.rint(ntrain/self.batchsize))
-            # split dataset into batches
-            newset = np.array_split(shuffled_dataset, Nbatches)
-            newtarget = np.array_split(shuffled_target, Nbatches)
             # start training
             for rounds in range(self.training_rounds):
+                # shuffle dataset
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
+                # split dataset into batches
+                newset = np.array_split(shuffled_dataset, Nbatches)
+                newtarget = np.array_split(shuffled_target, Nbatches)
                 for n in range(Nbatches):
                     self.batch_train(newset[n],newtarget[n])
 
@@ -371,6 +368,30 @@ class NeuralNet (object):
                 score = score + 1.0
         score = score/nvalidation
         return score
+
+    def RMSE(self, dataset, target):
+        """
+        Method that computes and returns
+        the network RMSE on the given dataset
+        """
+        # build target for classification if needed
+        if self.scope=="Classification":
+            nout = self.layers[self.Nlayers-1].n
+            t = build_cl_target(target, nout)
+        else:
+            t = target
+        # dimension of validation dataset
+        nvalidation = len(dataset)
+        # init score
+        error = 0.0
+        # validate
+        for n in range(nvalidation):
+            self.forward_propagation(dataset[n])
+            # compute error
+            error += self.layers[self.Nlayers-1].compute_error(t[n])
+        error = m.sqrt(error/nvalidation)
+        return error
+
 
 
     def trainAndValidate(self, dataset, target, fraction):
@@ -559,6 +580,17 @@ class NeuralNet (object):
             self.layers[i].set_weights(weights)
         # close input file
         file_in.close()
+
+def build_cl_target(target, nout):
+    """
+    Function to build target of probabilities from
+    class labels -- for classification networks only
+    """
+    ndata = len(target)
+    t = np.zeros((ndata,nout))
+    for i in range(ndata):
+        t[i][target[i]] = 1.0
+    return t
 
 
 def shuffleDT(dataset, target):
