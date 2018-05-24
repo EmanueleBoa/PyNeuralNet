@@ -7,3 +7,5 @@ It consists of two modules:
 * `neuralnet.py` where the object `NeuralNet` (feed-forward neural network) and all the main methods are defined. 
 
 At the moment, only feed-forward neural networks with full connectivity between layers can be implemented.
+
+##1.   Building your neural network
