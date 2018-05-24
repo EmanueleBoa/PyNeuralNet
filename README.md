@@ -8,4 +8,4 @@ It consists of two modules:
 
 At the moment, only feed-forward neural networks with full connectivity between layers can be implemented.
 
-##1.   Building your neural network
+## 1. Building your neural network
