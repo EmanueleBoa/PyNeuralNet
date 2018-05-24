@@ -149,7 +149,7 @@ Here is an example of how to use the method:
 
 `average_score = net.cross_validation(dataset, target, N)`
 
-## Make predictions with the network
+## 3. Make predictions with the network
 
 This chapter will guide you to use your trained network in order to make predictions on new data.
 
