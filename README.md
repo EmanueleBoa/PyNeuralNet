@@ -66,3 +66,85 @@ The possible types of layer are:
 * `'Softmax'`: layer with Softmax activation function. Used for classification problems as output layer.
 
 When created, weights and biases of the layers are initialized with the normalized Xavier initialization. 
+
+## 2. Training and validation of the network
+
+This chapter will guide you to train and validate your neural network.
+
+### Data set and target output
+For training and validating the network you need to build a data set consisting of examples of input vectors with known output. Specifically, you will need a list (or a numpy array) containing the examples, and a list (or numpy array) with the corresponding target outputs. Suppose we call the first list `dataset` an the second one `target`. They must be built such that `target[i]` is the target output of the example `dataset[i]`.
+
+For a classification problem, the target output is simply a label indicating the class to which the input vector belongs. It must be an integer between `0` and `c-1`, where `c` is the total number of classes you wish to distinguish.
+
+For a regression problem, the target output is simply the value of the function you wish to approximate corresponding to the given example.  
+
+### Training the network
+The training consists in optimizing the parameters of the networks based on the information contained in a training set of data. This is done by iteratively minimizing an error function with a minimization algorithm. 
+
+The class `NeuralNet` uses either the _sum of squares_ error function or the _cross-entropy_ error function, depending on the type of the output layer and the scope of the network. Two stochastic minimization algorithms are implemented: Stochastic Gradient Descent (SGD) and Adam [Kingma, Diederik, and Jimmy Ba. “Adam: A method for stochastic optimization.” arXiv preprint arXiv:1412.6980 (2014)]. 
+
+#### Setting the parameters for the training
+You can set the parameters for the training with the method `set_training_param`. The argument taken by this method is a list of optional keyworded variables:
+* `solver`: is the algorithm for parameters optimization. You can choose between `"sgd"` (Stochastic Gradient Descent) or `"adam"`. If not specified, it is set to `"sgd"` by default. 
+* `learning_rate`: the learning rate used in the optimization process. If not specified, it is set to `0.01` by default. 
+* `momentum`: a positive number between 0 and 1. If specified, a momentum term is used. Only used when solver is `"sgd"`.
+* `weight_decay`: a positive number. If specified, a weight decay (L2 penalty regularization term) is used. If not specified, it is set to `0` by default.
+* `beta1`: exponential decay rate for estimates of first moment vector in adam, should be in [0, 1). If not specified, it is set to `0.9` by default. Only used when solver is `"adam"`.
+* `beta2`: exponential decay rate for estimates of second moment vector in adam, should be in [0, 1). If not specified, it is set to `0.99` by default. Only used when solver is `"adam"`.
+* `epsilon`: value for numerical stability in adam. If not specified, it is set to `1e-8` by default. Only used when solver is `"adam"`.
+* `batchsize`: an integer indicating the size of the batches when using a batched version of gradient descent.
+If not specified, it is set to `1` by default.
+* `training_rounds`: an integer indicating the number of times the data set is used for the training. If not specified, it is set to `1` by default.
+* `return_error`: boolean. If `True` a list with the error during the training is returned by the method that performs the training. If not specified, it is set to `True` by default.
+
+Here is an example of how to use the method:
+
+`net.set_training_param(solver="sgd", learning_rate=0.1, momentum=0.9, return_error=True, batchsize=10, training_rounds=10)`
+
+#### Parameters choice
+The optimal choice of the parameters depends on the specific problem. You should be particularly careful when choosing the learning rate. If this parameter is too low, then the learning is going to be very slow, while if it is too large, divergent oscillations (and overflows) may result. 
+
+#### Training
+The training is performed using the method `trainOnDataset(dataset, target)`, which takes as inputs a list of examples, `dataset`, and a list of target outputs, `target`. 
+
+Here is an example of how to use the method:
+
+`net.set_training_param(learning_rate=0.5, momentum=0.9, return_error=True, batchsize=10, training_rounds=10)`
+
+`train_error = net.trainOnDataset(training_set, training_target)`
+
+In this example `return_error=True` and, hence, the method `trainOnDataset` returns a list with the error.
+
+### Validation of the network (for classification only)
+Validating the network consists in evaluating its performance on a new set of examples, usually called _validation set_. In a classification problem, the performance, or accuracy, is measured as the percentage of correctly classified examples. 
+
+The methods presented in the following are meant to be used only for classification problems.
+
+#### Validation
+The validation of the network can be performed with the method `validate`, which takes as inputs a list of examples and a list of target outputs, and returns the score, i.e. the percentage of correctly classified examples.
+
+Here is an example of how to use the method:
+
+`validation_score = net.validate(validation_set, validation_target)`
+
+#### Training and validation with only one date set
+If you have only one data set, you can split it into two separate data sets, one for the training and one for the validation of the network.
+
+This can be done with the method `trainAndValidate(dataset, target, fraction)` which takes as inputs a data set and its corresponding target outputs, randomly splits it into a training set and a validation set, and performs the training and the validation of the network. The method returns a list with the error during the training (if `return_error` is set to `True`), the score on the training set, and the score of the validation set.
+
+Here is an example of how to use the method:
+
+`net.set_training_param(learning_rate=0.5, return_error=True)`
+
+`train_error, training_score, validation_score = net.trainAndValidate(dataset, targets, 0.9)`
+
+In this example the given data set is randomly split so that 90% of its data is used for the training, and the remaining 10% for the validation. 
+
+#### Cross-validation
+The best way to asses the accuracy of the network when having only one data set available is to use the cross-validation procedure. This procedure consists in first randomly dividing the data set into N distinct segments. Then, the network is trained using data from N-1 of the segments and its performance is tested using the remaining segment. This procedure is repeated for each of the N possible choices for the segment which is omitted from the training process, and the accuracy averaged over all N results.
+
+Cross-validation can be performed with the method `cross_validation`.
+
+Here is an example of how to use the method:
+
+`average_score = net.cross_validation(dataset, target, N)`
