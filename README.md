@@ -148,3 +148,55 @@ Cross-validation can be performed with the method `cross_validation`.
 Here is an example of how to use the method:
 
 `average_score = net.cross_validation(dataset, target, N)`
+
+## Make predictions with the network
+
+This chapter will guide you to use your trained network in order to make predictions on new data.
+
+### Predict the output of new data
+The output of a new input vector can be produced with the method `activate`. This method takes as input a vector and returns the output of the network. 
+
+Here is an example of how to use the method:
+
+`output = net.activate(input_vector)`
+
+This method is thought mainly for regression problems. Nonetheless, in the case of a classification problem, the method will return a list with the probabilities that the input vector belongs to any of the c classes.
+
+To produce the output of many vectors contained in a data set you can use the method `predict_dataset`, which takes as input a data set and returns a list with the corresponding outputs.
+
+Here is an example of how to use the method:
+
+`output_list = net.predict_dataset(dataset)`
+
+
+### Classify new data
+To classify a new input vector you can use the method `classify`, which takes as input a vector and returns a label indicating to most likely class to which it belongs.
+
+Here is an example of how to use the method:
+
+`output_label = net.classify(input_vector)`
+
+To classify many vectors contained in a data set you can use the method `classify_dataset`, which takes as input a data set and returns a list of labels.
+
+Here is an example of how to use the method:
+
+`output_labels = net.classify_dataset(dataset)`
+
+### Save and load a trained network
+You can save your trained network on a file with the method `save`.
+
+Here is an example of how to use the method:
+
+`net.save('net.txt')`
+
+In the example, the network is saved on a file named `net.txt`.
+
+You can load a saved network with the method `load`.
+
+Here is an example of how to use the method:
+
+`net = NeuralNet()`
+
+`net.load('net.txt')`
+
+In the example, the network saved on the file named `net.txt` is loaded.
