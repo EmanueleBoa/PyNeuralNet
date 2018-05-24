@@ -92,7 +92,7 @@ You can set the parameters for the training with the method `set_training_param`
 * `beta1`: exponential decay rate for estimates of first moment vector in adam, should be in [0, 1). If not specified, it is set to `0.9` by default. Only used when solver is `"adam"`.
 * `beta2`: exponential decay rate for estimates of second moment vector in adam, should be in [0, 1). If not specified, it is set to `0.99` by default. Only used when solver is `"adam"`.
 * `epsilon`: value for numerical stability in adam. If not specified, it is set to `1e-8` by default. Only used when solver is `"adam"`.
-* `batchsize`: an integer indicating the size of the batches when using a batched version of gradient descent.
+* `batchsize`: an integer indicating the size of the batches when using a batched version of sgd or adam.
 If not specified, it is set to `1` by default.
 * `training_rounds`: an integer indicating the number of times the data set is used for the training. If not specified, it is set to `1` by default.
 * `return_error`: boolean. If `True` a list with the error during the training is returned by the method that performs the training. If not specified, it is set to `True` by default.
