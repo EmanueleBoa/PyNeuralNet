@@ -40,7 +40,7 @@ validation_target = np.array(validation_target)
 Build Neural network
 """
 net = NeuralNet()
-net.build_network(1,4,1, hidden_type="Sigmoid", out_type="Linear", scope="Regression", verbose=True)
+net.build_network(1,4,1, hidden_type="Tanh", out_type="Linear", scope="Regression", verbose=True)
 
 """
 Another way of building the same network
@@ -56,9 +56,18 @@ Another way of building the same network
 Training
 """
 # set parameters for training
-net.set_training_param(learning_rate=0.5, momentum=0.9, return_error=True, batchsize=10, training_rounds=10)
+net.set_training_param(solver="sgd",learning_rate=0.5, momentum=0.9,\
+return_error=True, batchsize=10, training_rounds=10, weight_decay=0.00001)
 #train
 train_error = net.trainOnDataset(training_set, training_target)
+
+"""
+Compute and print RMSE on training and validation sets
+"""
+train_rmse = net.RMSE(training_set, training_target)
+test_rmse = net.RMSE(validation_set, validation_target)
+print("Train RMSE =       "+str(train_rmse))
+print("Test RMSE  =       "+str(test_rmse))
 
 """
 Print error during training on file
@@ -84,9 +93,9 @@ for i in range(len(out)):
 file_out.close()
 
 """
-Save network on file for future use
+Save trained network on file for future use
 """
-net.save("net.txt")
+#net.save("net.txt")
 
 """
 Load saved network

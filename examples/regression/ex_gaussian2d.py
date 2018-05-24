@@ -8,7 +8,6 @@ import math as m
 import random as r
 from neuralnet import NeuralNet
 
-
 """
 Create training set with corresponding target
 """
@@ -69,6 +68,14 @@ net.set_training_param(learning_rate=0.5, momentum=0.9, return_error=True, batch
 train_error = net.trainOnDataset(training_set, training_target)
 
 """
+Compute and print RMSE on training and validation sets
+"""
+train_rmse = net.RMSE(training_set, training_target)
+test_rmse = net.RMSE(validation_set, validation_target)
+print("Train RMSE =       "+str(train_rmse))
+print("Test RMSE  =       "+str(test_rmse))
+
+"""
 Print error during training on file
 """
 file_out = open("train_error.dat",'w')
@@ -92,7 +99,7 @@ for i in range(len(out)):
 file_out.close()
 
 """
-Save network on file for future use
+Save trained network on file for future use
 """
 net.save("net.txt")
 
