@@ -29,8 +29,14 @@ class Linear (Layer):
         self.weights_old = np.zeros((n, nprevious))
         self.biases = np.zeros(n)
         self.biases_old = np.zeros(n)
+        self.grad_weights = np.zeros((n, nprevious))
+        self.mom1_weights = np.zeros((n, nprevious))
+        self.mom2_weights = np.zeros((n, nprevious))
         self.delta_weights = np.zeros((n, nprevious))
         self.delta_weights_old = np.zeros((n, nprevious))
+        self.grad_biases = np.zeros(n)
+        self.mom1_biases = np.zeros(n)
+        self.mom2_biases = np.zeros(n)
         self.delta_biases = np.zeros(n)
         self.delta_biases_old = np.zeros(n)
         self.deltas = np.zeros(n)
@@ -82,33 +88,70 @@ class Linear (Layer):
         """
         self.deltas = np.dot(next_layer.weights.transpose(),next_layer.deltas)
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
         # delta biases
-        self.delta_biases += self.deltas
+        self.grad_biases += self.deltas
         # delta weights
-        self.delta_weights += np.outer(self.deltas,previous_layer.units)
+        self.grad_weights += np.outer(self.deltas,previous_layer.units)
+
+    def update_moments(self, beta1, beta2, weight_decay):
+        """
+        Update moments of the gradients
+        """
+        # add weight decay term to gradients
+        self.grad_weights += weight_decay*self.weights
+        # first moment
+        self.mom1_weights = beta1*self.mom1_weights+(1.0-beta1)*self.grad_weights
+        self.mom1_biases = beta1*self.mom1_biases+(1.0-beta1)*self.grad_biases
+        # second moment
+        self.mom2_weights = beta2*self.mom2_weights+(1.0-beta2)*np.square(self.grad_weights)
+        self.mom2_biases = beta2*self.mom2_biases+(1.0-beta2)*np.square(self.grad_biases)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        # save old weights and biases
+        self.weights_old = np.copy(self.weights)
+        self.biases_old = np.copy(self.biases)
+        # update moments of the gradients
+        self.update_moments(beta1, beta2, weight_decay)
+        # effective rate (for bias corrected moment estimates)
+        effective_rate = learning_rate*m.sqrt(1.0-m.pow(beta2,time))/(1.0-m.pow(beta1,time))
+        # update weights and biases
+        self.delta_weights = -effective_rate*self.mom1_weights/\
+        (np.sqrt(self.mom2_weights)+epsilon)
+        self.weights = self.weights + self.delta_weights
+        self.delta_biases = -effective_rate*self.mom1_biases/\
+        (np.sqrt(self.mom2_biases)+epsilon)
+        self.biases = self.biases + self.delta_biases
+        # setting gradients to zero
+        self.grad_weights.fill(0.0)
+        self.grad_biases.fill(0.0)
+
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
-        Update wheights and biases with batch gradient descent (with momentum term)
+        Update wheights and biases with stocastic gradient descent (with momentum)
         """
         # save old weights and biases
-        self.weights_old = self.weights
-        self.biases_old = self.biases
+        self.weights_old = np.copy(self.weights)
+        self.biases_old = np.copy(self.biases)
         # update weights and biases
-        self.delta_weights = -learning_rate*(self.delta_weights/batchsize+\
+        self.delta_weights = -learning_rate*(self.grad_weights/batchsize+\
         weight_decay*self.weights)+momentum*self.delta_weights_old
         self.weights = self.weights + self.delta_weights
-        self.delta_biases = -learning_rate*self.delta_biases/batchsize+momentum*self.delta_biases_old
+        self.delta_biases = -learning_rate*self.grad_biases/batchsize+momentum*self.delta_biases_old
         self.biases = self.biases + self.delta_biases
-        # setting delta weights and biases to zero
+        # saving old updates
         self.delta_weights_old = self.weights-self.weights_old
         self.delta_biases_old = self.biases-self.biases_old
-        self.delta_weights.fill(0.0)
-        self.delta_biases.fill(0.0)
+        # setting gradients to zero
+        self.grad_weights.fill(0.0)
+        self.grad_biases.fill(0.0)
 
     def pick_class(self):
         """
@@ -180,11 +223,17 @@ class Softmax (Layer):
         """
         self.lin.deltas = self.units - target
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
-        self.lin.update_delta_weights(previous_layer)
+        self.lin.update_gradients(previous_layer)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        self.lin.adam(learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time)
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
@@ -262,11 +311,17 @@ class Tanh (Layer):
         self.lin.deltas = tanhprime*(self.units - target)
 
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
-        self.lin.update_delta_weights(previous_layer)
+        self.lin.update_gradients(previous_layer)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        self.lin.adam(learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time)
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
@@ -351,11 +406,17 @@ class Sigmoid (Layer):
         """
         self.lin.deltas = self.units*(1.0-self.units)*(self.units-target)
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
-        self.lin.update_delta_weights(previous_layer)
+        self.lin.update_gradients(previous_layer)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        self.lin.adam(learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time)
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
@@ -439,11 +500,17 @@ class SoftSign (Layer):
         softsignprime = 1.0/np.power(1.0+np.absolute(self.lin.units),2)
         self.lin.deltas = softsignprime*(self.units - target)
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
-        self.lin.update_delta_weights(previous_layer)
+        self.lin.update_gradients(previous_layer)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        self.lin.adam(learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time)
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """
@@ -529,11 +596,17 @@ class ReLU (Layer):
         reluprime = 1.0*(self.lin.units>0)
         self.lin.deltas = reluprime*(self.units - target)
 
-    def update_delta_weights(self, previous_layer):
+    def update_gradients(self, previous_layer):
         """
         Update delta wheights and biases
         """
-        self.lin.update_delta_weights(previous_layer)
+        self.lin.update_gradients(previous_layer)
+
+    def adam(self, learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time):
+        """
+        Update wheights and biases with adam
+        """
+        self.lin.adam(learning_rate, beta1, beta2, epsilon, batchsize, weight_decay, time)
 
     def gradient_descent(self, learning_rate, momentum, batchsize, weight_decay):
         """

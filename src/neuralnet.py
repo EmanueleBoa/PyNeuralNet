@@ -18,8 +18,12 @@ class NeuralNet (object):
         self.Nlayers = 0
         self.out_type = None
         self.hidden_type = None
+        self.solver = "sgd"
         self.learning_rate = 0.01
         self.momentum = 0.0
+        self.beta1 = 0.9
+        self.beta2 = 0.999
+        self.epsilon = 1e-08
         self.weight_decay = 0.0
         self.batchsize = 1
         self.training_rounds = 1
@@ -215,30 +219,57 @@ class NeuralNet (object):
     def set_training_param(self, **params):
         """
         Method to set the parameters for training:
+        - solver
         - learning_rate
         - momentum
+        - beta1
+        - beta2
+        - epsilon
         - weight_decay
         - batchsize
         - training_rounds
         - return_error
         If not called default values are used
         """
+        if params.has_key("solver"):
+            self.solver = params.get("solver")
+            if (self.solver!="sgd" and self.solver!="adam"):
+                print ('ERROR: solver "'+self.solver+'" not available!')
+                exit(1)
         if params.has_key("learning_rate"):
             self.learning_rate = params.get("learning_rate")
         if params.has_key("momentum"):
             self.momentum = params.get("momentum")
+        if params.has_key("beta1"):
+            self.beta1 = params.get("beta1")
+        if params.has_key("beta2"):
+            self.beta2 = params.get("beta2")
+        if params.has_key("epsilon"):
+            self.epsilon = params.get("epsilon")
         if params.has_key("weight_decay"):
             self.weight_decay = params.get("weight_decay")
         if params.has_key("batchsize"):
             self.batchsize = params.get("batchsize")
+            if self.batchsize<0:
+                print ('ERROR: batchsize must be larger than 0!')
+                exit(1)
         if params.has_key("training_rounds"):
             self.training_rounds = params.get("training_rounds")
+            if self.training_rounds<0:
+                print ('ERROR: training_rounds must be larger than 0!')
+                exit(1)
         if params.has_key("return_error"):
             self.return_error = params.get("return_error")
         if self.verbose:
             print "\n**********     Parameters for training    **********"
+            print ("Solver:           "+ str(self.solver))
             print ("Learning rate:    "+ str(self.learning_rate))
-            print ("Momentum:         "+ str(self.momentum))
+            if self.solver=="sgd":
+                print ("Momentum:         "+ str(self.momentum))
+            if self.solver=="adam":
+                print ("Beta1:            "+ str(self.beta1))
+                print ("Beta2:            "+ str(self.beta2))
+                print ("Epsilon:          "+ str(self.epsilon))
             print ("Weight decay:     "+ str(self.weight_decay))
             print ("Batch size:       "+ str(self.batchsize))
             print ("Training rounds:  "+ str(self.training_rounds))
@@ -262,17 +293,17 @@ class NeuralNet (object):
         """
         # output layer
         self.layers[self.Nlayers-1].delta_out(target)
-        self.layers[self.Nlayers-1].update_delta_weights(self.layers[self.Nlayers-2])
+        self.layers[self.Nlayers-1].update_gradients(self.layers[self.Nlayers-2])
         # hidden layers (if present)
         for i in range(self.Nlayers-2,0,-1):
             if self.layers[i+1].type=="Linear":
                 self.layers[i].delta(self.layers[i+1])
             else:
                 self.layers[i].delta(self.layers[i+1].lin)
-            self.layers[i].update_delta_weights(self.layers[i-1])
+            self.layers[i].update_gradients(self.layers[i-1])
 
 
-    def batch_train(self, batch, target):
+    def batch_train_sgd(self, batch, target,  time):
         # batch size
         nbatch = len(batch)
         # error
@@ -293,7 +324,7 @@ class NeuralNet (object):
         self.error_list.append(error)
 
 
-    def vector_train(self, vector, target):
+    def vector_train_sgd(self, vector, target, time):
         # produce output
         self.forward_propagation(vector)
         # compute error
@@ -304,6 +335,41 @@ class NeuralNet (object):
         for i in range(1,self.Nlayers):
             self.layers[i].gradient_descent(self.learning_rate, \
             self.momentum, self.batchsize, self.weight_decay)
+        #add error to error_list
+        self.error_list.append(error)
+
+    def batch_train_adam(self, batch, target, time):
+        # batch size
+        nbatch = len(batch)
+        # error
+        error = 0.0
+        for n in range(nbatch):
+            # produce output
+            self.forward_propagation(batch[n])
+            # compute error
+            error += self.layers[self.Nlayers-1].compute_error(target[n])
+            # back propagate the error
+            self.back_propagation(target[n])
+        # update weights (batch gradient-descent+momentum)
+        for i in range(1,self.Nlayers):
+            self.layers[i].adam(self.learning_rate, self.beta1, self.beta2,\
+            self.epsilon, nbatch, self.weight_decay, time)
+        #add error to error_list
+        error /= nbatch
+        self.error_list.append(error)
+
+
+    def vector_train_adam(self, vector, target, time):
+        # produce output
+        self.forward_propagation(vector)
+        # compute error
+        error = self.layers[self.Nlayers-1].compute_error(target)
+        # back propagate the error
+        self.back_propagation(target)
+        # update weights (gradient-descent+momentum)
+        for i in range(1,self.Nlayers):
+            self.layers[i].adam(self.learning_rate, self.beta1, self.beta2,\
+            self.epsilon, nbatch, self.weight_decay, time)
         #add error to error_list
         self.error_list.append(error)
 
@@ -323,27 +389,43 @@ class NeuralNet (object):
         ntrain = len(dataset)
         # Sequential training
         if self.batchsize == 1:
+            # select solver
+            if self.solver == "sgd":
+                update = self.vector_train_sgd
+            elif self.solver == "adam":
+                update = self.vector_train_adam
+            time = 0
             for rounds in range(self.training_rounds):
                 # shuffle dataset
-                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
                 for n in range(ntrain):
-                    self.vector_train(shuffled_dataset[n],shuffled_target[n])
+                    time += 1
+                    update(shuffled_dataset[n],shuffled_target[n],time)
 
         # Batch training
         else:
-            # dimension of training dataset
-            ntrain = len(dataset)
+            # select solver
+            if self.solver == "sgd":
+                update = self.batch_train_sgd
+            elif self.solver == "adam":
+                update = self.batch_train_adam
             # number of batches
-            Nbatches = int(np.rint(ntrain/self.batchsize))
+            if self.batchsize>ntrain:
+                self.batchsize = ntrain
+                Nbatches = 1
+            else:
+                Nbatches = int(np.rint(ntrain/self.batchsize))
             # start training
+            time = 0
             for rounds in range(self.training_rounds):
                 # shuffle dataset
-                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
                 # split dataset into batches
                 newset = np.array_split(shuffled_dataset, Nbatches)
                 newtarget = np.array_split(shuffled_target, Nbatches)
                 for n in range(Nbatches):
-                    self.batch_train(newset[n],newtarget[n])
+                    time += 1
+                    update(newset[n],newtarget[n],time)
 
         if self.return_error:
             return self.error_list
@@ -369,6 +451,7 @@ class NeuralNet (object):
         score = score/nvalidation
         return score
 
+
     def RMSE(self, dataset, target):
         """
         Method that computes and returns
@@ -391,7 +474,6 @@ class NeuralNet (object):
             error += self.layers[self.Nlayers-1].compute_error(t[n])
         error = m.sqrt(error/nvalidation)
         return error
-
 
 
     def trainAndValidate(self, dataset, target, fraction):
