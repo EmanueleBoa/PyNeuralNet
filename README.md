@@ -200,3 +200,21 @@ Here is an example of how to use the method:
 `net.load('net.txt')`
 
 In the example, the network saved on the file named `net.txt` is loaded.
+
+## 4. Examples
+
+Look at the examples to better understand how to use the module `neuralnet.py`.
+
+In the folder _examples_ you can find two examples of neural networks used for regression and two for classification.
+
+###  Regression
+* `ex_gaussian1d.py` is the implementation of a neural network that learns to approximate a gaussian in one dimension.
+
+* `ex_gaussian2d.py` is the implementation of a neural network that learns to approximate a gaussian in two dimensions.
+
+###  Classification
+* `ex_XOR.py` is the implementation of a neural network that learns to solve the XOR problem.
+
+* `mnist_recognition.py` is the implementation of a neural network that learns to classify handwritten digits (numbers between 0 and 9) from the MNIST Data set (available at http://yann.lecun.com/exdb/mnist/). To run this program it is important that the data set and the module `readDataset.py` are in the same folder as the program.
+
+All the examples make use of the modules `neuralnet.py` and `layer.py`, which must be in the same folder as the examples in order to be imported (or you need to import them with the right path).
