@@ -1,5 +1,4 @@
 # PyNeuralNet
-A python library for Artificial Neural Networks
 
 PyNeuralNet is a python library to implement Artificial Neural Networks for classification and regression with a few lines of code and it is thought to be as easy to use as possible.
 
