@@ -26,9 +26,7 @@ class Linear (Layer):
         Layer.__init__(self, n)
         self.nprevious = nprevious
         self.weights = np.zeros((n, nprevious))
-        self.weights_old = np.zeros((n, nprevious))
         self.biases = np.zeros(n)
-        self.biases_old = np.zeros(n)
         self.grad_weights = np.zeros((n, nprevious))
         self.mom1_weights = np.zeros((n, nprevious))
         self.mom2_weights = np.zeros((n, nprevious))
@@ -51,22 +49,18 @@ class Linear (Layer):
         for i in range(self.n):
             for j in range(self.nprevious):
                 self.weights[i,j] = random.gauss(mean, sigma)
-        self.weights_old = self.weights
 
     def set_biases(self, biases):
         """
         Set biases of linear layer equal to array biases
         """
         self.biases = biases
-        self.biases_old = biases
 
     def set_weights(self, weights):
         """
         Set weights of linear layer equal to array weights
         """
         self.weights = weights
-        self.weights_old = weights
-
 
     def activate(self, previous_layer):
         """
@@ -252,9 +246,8 @@ class Softmax (Layer):
         """
         Return error (cross-entropy)
         """
-        error = 0.0
-        for i in range(self.n):
-            error += float(-target[i]*np.log(self.units[i]))
+        error_list = -target*np.log(self.units)
+        error = np.sum(error_list)
         return error
 
 
