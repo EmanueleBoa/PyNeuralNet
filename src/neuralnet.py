@@ -397,7 +397,7 @@ class NeuralNet (object):
             time = 0
             for rounds in range(self.training_rounds):
                 # shuffle dataset
-                shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
                 for n in range(ntrain):
                     time += 1
                     update(shuffled_dataset[n],shuffled_target[n],time)
@@ -419,7 +419,7 @@ class NeuralNet (object):
             time = 0
             for rounds in range(self.training_rounds):
                 # shuffle dataset
-                shuffled_dataset, shuffled_target = shuffleDT(dataset, target)
+                shuffled_dataset, shuffled_target = shuffleDT(dataset, t)
                 # split dataset into batches
                 newset = np.array_split(shuffled_dataset, Nbatches)
                 newtarget = np.array_split(shuffled_target, Nbatches)
