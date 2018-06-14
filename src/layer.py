@@ -157,13 +157,8 @@ class Linear (Layer):
         """
         Return error (sum-of-squares)
         """
-        error = 0.0
-        if(self.n>1):
-            for i in range(self.n):
-                error += (target[i]-self.units[i])*(target[i]-self.units[i])
-            error *= 0.5
-        else:
-            error += 0.5*(target-self.units[0])*(target-self.units[0])
+        error_list = 0.5*(target-self.units)*(target-self.units)
+        error = np.sum(error_list)
         return error
 
 
@@ -338,13 +333,8 @@ class Tanh (Layer):
         """
         Return error (sum-of-squares)
         """
-        error = 0.0
-        if(self.n>1):
-            for i in range(self.n):
-                error += (target[i]-self.units[i])*(target[i]-self.units[i])
-            error *= 0.5
-        else:
-            error += 0.5*(target-self.units[0])*(target-self.units[0])
+        error_list = 0.5*(target-self.units)*(target-self.units)
+        error = np.sum(error_list)
         return error
 
 
@@ -431,13 +421,8 @@ class Sigmoid (Layer):
         """
         Return error (sum-of-squares)
         """
-        error = 0.0
-        if(self.n>1):
-            for i in range(self.n):
-                error += (target[i]-self.units[i])*(target[i]-self.units[i])
-            error *= 0.5
-        else:
-            error += 0.5*(target-self.units[0])*(target-self.units[0])
+        error_list = 0.5*(target-self.units)*(target-self.units)
+        error = np.sum(error_list)
         return error
 
 
@@ -527,13 +512,8 @@ class SoftSign (Layer):
         """
         Return error (sum-of-squares)
         """
-        error = 0.0
-        if(self.n>1):
-            for i in range(self.n):
-                error += (target[i]-self.units[i])*(target[i]-self.units[i])
-            error *= 0.5
-        else:
-            error += 0.5*(target-self.units[0])*(target-self.units[0])
+        error_list = 0.5*(target-self.units)*(target-self.units)
+        error = np.sum(error_list)
         return error
 
 
@@ -623,11 +603,6 @@ class ReLU (Layer):
         """
         Return error (sum-of-squares)
         """
-        error = 0.0
-        if(self.n>1):
-            for i in range(self.n):
-                error += (target[i]-self.units[i])*(target[i]-self.units[i])
-            error *= 0.5
-        else:
-            error += 0.5*(target-self.units[0])*(target-self.units[0])
+        error_list = 0.5*(target-self.units)*(target-self.units)
+        error = np.sum(error_list)
         return error
