@@ -130,7 +130,7 @@ class Linear (Layer):
         self.delta_weights = momentum*self.delta_weights-learning_rate*(self.grad_weights/batchsize+\
         weight_decay*self.weights)
         self.weights = self.weights + self.delta_weights
-        self.delta_biases = +momentum*self.delta_biases-learning_rate*self.grad_biases/batchsize
+        self.delta_biases = momentum*self.delta_biases-learning_rate*self.grad_biases/batchsize
         self.biases = self.biases + self.delta_biases
         # setting gradients to zero
         self.grad_weights.fill(0.0)
