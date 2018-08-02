@@ -31,12 +31,10 @@ class Linear (Layer):
         self.mom1_weights = np.zeros((n, nprevious))
         self.mom2_weights = np.zeros((n, nprevious))
         self.delta_weights = np.zeros((n, nprevious))
-        self.delta_weights_old = np.zeros((n, nprevious))
         self.grad_biases = np.zeros(n)
         self.mom1_biases = np.zeros(n)
         self.mom2_biases = np.zeros(n)
         self.delta_biases = np.zeros(n)
-        self.delta_biases_old = np.zeros(n)
         self.deltas = np.zeros(n)
         self.type = "Linear"
 
@@ -108,9 +106,6 @@ class Linear (Layer):
         """
         Update wheights and biases with adam
         """
-        # save old weights and biases
-        self.weights_old = np.copy(self.weights)
-        self.biases_old = np.copy(self.biases)
         # update moments of the gradients
         self.update_moments(beta1, beta2, weight_decay)
         # effective rate (for bias corrected moment estimates)
@@ -131,18 +126,12 @@ class Linear (Layer):
         """
         Update wheights and biases with stocastic gradient descent (with momentum)
         """
-        # save old weights and biases
-        self.weights_old = np.copy(self.weights)
-        self.biases_old = np.copy(self.biases)
         # update weights and biases
-        self.delta_weights = -learning_rate*(self.grad_weights/batchsize+\
-        weight_decay*self.weights)+momentum*self.delta_weights_old
+        self.delta_weights = momentum*self.delta_weights-learning_rate*(self.grad_weights/batchsize+\
+        weight_decay*self.weights)
         self.weights = self.weights + self.delta_weights
-        self.delta_biases = -learning_rate*self.grad_biases/batchsize+momentum*self.delta_biases_old
+        self.delta_biases = +momentum*self.delta_biases-learning_rate*self.grad_biases/batchsize
         self.biases = self.biases + self.delta_biases
-        # saving old updates
-        self.delta_weights_old = self.weights-self.weights_old
-        self.delta_biases_old = self.biases-self.biases_old
         # setting gradients to zero
         self.grad_weights.fill(0.0)
         self.grad_biases.fill(0.0)
