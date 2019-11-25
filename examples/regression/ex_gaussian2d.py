@@ -46,17 +46,17 @@ validation_target = np.array(validation_target)
 Build Neural network
 """
 net = NeuralNet()
-net.build_network(2,8,8,1, hidden_type="Sigmoid", out_type="Linear", scope="Regression", verbose=True)
+net.build_network(2,8,8,1, hidden_type="sigmoid", out_type="linear", scope="regression", verbose=True)
 
 """
 Another way of building the same network
 """
 #net = NeuralNet()
-#net.add_layer("Input",2)
-#net.add_layer("Sigmoid",8)
-#net.add_layer("Sigmoid",8)
-#net.add_layer("Linear",1)
-#net.set_scope("Regression")
+#net.add_layer("input",2)
+#net.add_layer("sigmoid",8)
+#net.add_layer("sigmoid",8)
+#net.add_layer("linear",1)
+#net.set_scope("regression")
 #net.print_network_structure()
 
 """
@@ -68,12 +68,12 @@ net.set_training_param(learning_rate=0.5, momentum=0.9, return_error=True, batch
 train_error = net.trainOnDataset(training_set, training_target)
 
 """
-Compute and print RMSE on training and validation sets
+Compute and print loss on training and validation sets
 """
-train_rmse = net.RMSE(training_set, training_target)
-test_rmse = net.RMSE(validation_set, validation_target)
-print("Train RMSE =       "+str(train_rmse))
-print("Test RMSE  =       "+str(test_rmse))
+train_loss = net.loss(training_set, training_target)
+test_loss = net.loss(validation_set, validation_target)
+print("Train loss =       "+str(train_loss))
+print("Test loss  =       "+str(test_loss))
 
 """
 Print error during training on file
