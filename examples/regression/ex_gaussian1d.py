@@ -57,7 +57,7 @@ Training
 """
 # set parameters for training
 net.set_training_param(solver="sgd",learning_rate=0.5, momentum=0.9,\
-return_error=True, batchsize=10, training_rounds=1, weight_decay=0.00001)
+return_error=True, batchsize=10, training_rounds=10, weight_decay=0.00001)
 #train
 train_error = net.trainOnDataset(training_set, training_target)
 
