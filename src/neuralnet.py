@@ -49,47 +49,47 @@ class NeuralNet (object):
         if types.has_key("scope"):
             self.scope = types.get("scope")
         else:
-            self.scope = "Classification"
+            self.scope = "classification"
         # check if the user specified the types of layers
         # if not set to default types
         if types.has_key("out_type"):
             self.out_type = types.get("out_type")
         else:
             if d[Nlayers-1]==1:
-                self.out_type = "Linear"
+                self.out_type = "linear"
             else:
-                self.out_type = "Softmax"
+                self.out_type = "softmax"
         if types.has_key("hidden_type"):
             self.hidden_type = types.get("hidden_type")
         else:
             if Nlayers>2:
-                self.hidden_type = "Tanh"
+                self.hidden_type = "tanh"
         # add layers to the neural network
         # add input layers
         self.layers.append(Layer(d[0]))
         # if present, add hidden layers
         if Nlayers>2:
-            if self.hidden_type == "Tanh":
+            if self.hidden_type == "tanh":
                 for i in range(1,Nlayers-1):
                     self.layers.append(Tanh(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
-            elif self.hidden_type == "Sigmoid":
+            elif self.hidden_type == "sigmoid":
                 for i in range(1,Nlayers-1):
                     self.layers.append(Sigmoid(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
-            elif self.hidden_type == "Linear":
+            elif self.hidden_type == "linear":
                 for i in range(1,Nlayers-1):
                     self.layers.append(Linear(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
-            elif self.hidden_type == "Softmax":
+            elif self.hidden_type == "softmax":
                 for i in range(1,Nlayers-1):
                     self.layers.append(Softmax(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
-            elif self.hidden_type == "SoftSign":
+            elif self.hidden_type == "softsign":
                 for i in range(1,Nlayers-1):
                     self.layers.append(SoftSign(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
-            elif self.hidden_type == "ReLU":
+            elif self.hidden_type == "relu":
                 for i in range(1,Nlayers-1):
                     self.layers.append(ReLU(d[i],d[i-1]))
                     self.layers[i].xavier_init_weights()
@@ -97,22 +97,22 @@ class NeuralNet (object):
                 print ("ERROR: no layer with "+str(self.hidden_type)+" exist!")
                 exit(1)
         # add output layer
-        if self.out_type == "Softmax":
+        if self.out_type == "softmax":
             self.layers.append(Softmax(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
-        elif self.out_type == "Sigmoid":
+        elif self.out_type == "sigmoid":
             self.layers.append(Sigmoid(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
-        elif self.out_type == "Linear":
+        elif self.out_type == "linear":
             self.layers.append(Linear(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
-        elif self.out_type == "Tanh":
+        elif self.out_type == "tanh":
             self.layers.append(Tanh(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
-        elif self.out_type == "SoftSign":
+        elif self.out_type == "softsign":
             self.layers.append(SoftSign(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
-        elif self.out_type == "ReLU":
+        elif self.out_type == "relu":
             self.layers.append(ReLU(d[Nlayers-1],d[Nlayers-2]))
             self.layers[Nlayers-1].xavier_init_weights()
         else:
@@ -129,14 +129,14 @@ class NeuralNet (object):
         Method that adds to the network a layer
         of dimension dim and type type
         """
-        if type=="Input":
+        if type=="input":
             if self.Nlayers==0:
                 self.layers.append(Layer(dim))
                 self.Nlayers = len(self.layers)
             else:
                 print ("ERROR: the network already has an input layer!")
                 exit(1)
-        elif type=="Linear":
+        elif type=="linear":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -144,7 +144,7 @@ class NeuralNet (object):
                 self.layers.append(Linear(dim,self.layers[self.Nlayers-1].n))
                 self.Nlayers = len(self.layers)
                 self.layers[self.Nlayers-1].xavier_init_weights()
-        elif type=="Tanh":
+        elif type=="tanh":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -152,7 +152,7 @@ class NeuralNet (object):
                 self.layers.append(Tanh(dim,self.layers[self.Nlayers-1].n))
                 self.Nlayers = len(self.layers)
                 self.layers[self.Nlayers-1].xavier_init_weights()
-        elif type=="ReLU":
+        elif type=="relu":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -160,7 +160,7 @@ class NeuralNet (object):
                 self.layers.append(ReLU(dim,self.layers[self.Nlayers-1].n))
                 self.Nlayers = len(self.layers)
                 self.layers[self.Nlayers-1].xavier_init_weights()
-        elif type=="SoftSign":
+        elif type=="softsign":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -168,7 +168,7 @@ class NeuralNet (object):
                 self.layers.append(SoftSign(dim,self.layers[self.Nlayers-1].n))
                 self.Nlayers = len(self.layers)
                 self.layers[self.Nlayers-1].xavier_init_weights()
-        elif type=="Sigmoid":
+        elif type=="sigmoid":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -176,7 +176,7 @@ class NeuralNet (object):
                 self.layers.append(Sigmoid(dim,self.layers[self.Nlayers-1].n))
                 self.Nlayers = len(self.layers)
                 self.layers[self.Nlayers-1].xavier_init_weights()
-        elif type=="Softmax":
+        elif type=="softmax":
             if self.Nlayers==0:
                 print ("ERROR: the network needs an input layer first!")
                 exit(1)
@@ -190,7 +190,7 @@ class NeuralNet (object):
 
 
     def set_scope(self, scope):
-        if scope=="Classification" or scope=="Regression":
+        if scope=="classification" or scope=="regression":
             self.scope = scope
         else:
             print ("Error: scope must be Classification or Regression!")
@@ -296,7 +296,7 @@ class NeuralNet (object):
         self.layers[self.Nlayers-1].update_gradients(self.layers[self.Nlayers-2])
         # hidden layers (if present)
         for i in range(self.Nlayers-2,0,-1):
-            if self.layers[i+1].type=="Linear":
+            if self.layers[i+1].type=="linear":
                 self.layers[i].delta(self.layers[i+1])
             else:
                 self.layers[i].delta(self.layers[i+1].lin)
@@ -373,6 +373,10 @@ class NeuralNet (object):
         #add error to error_list
         self.error_list.append(error)
 
+    def reset_gradients(self):
+        for i in range(1,self.Nlayers):
+            self.layers[i].reset_gradients()
+
 
     def trainOnDataset(self, dataset, target):
         """
@@ -380,7 +384,7 @@ class NeuralNet (object):
         on the given training dataset with corresponding target
         """
         # build target for classification if needed
-        if self.scope=="Classification":
+        if self.scope=="classification":
             nout = self.layers[self.Nlayers-1].n
             t = build_cl_target(target, nout)
         else:
@@ -452,13 +456,13 @@ class NeuralNet (object):
         return score
 
 
-    def RMSE(self, dataset, target):
+    def loss(self, dataset, target):
         """
         Method that computes and returns
-        the network RMSE on the given dataset
+        the network loss on the given dataset
         """
         # build target for classification if needed
-        if self.scope=="Classification":
+        if self.scope=="classification":
             nout = self.layers[self.Nlayers-1].n
             t = build_cl_target(target, nout)
         else:
@@ -472,7 +476,7 @@ class NeuralNet (object):
             self.forward_propagation(dataset[n])
             # compute error
             error += self.layers[self.Nlayers-1].compute_error(t[n])
-        error = m.sqrt(error/nvalidation)
+        error = error/nvalidation
         return error
 
 
@@ -603,7 +607,7 @@ class NeuralNet (object):
         for i in range(1,self.Nlayers):
             file_out.write("* Biases of layer "+str(i)+":\n")
             for j in range(0,self.layers[i].n):
-                if self.layers[i].type=="Linear":
+                if self.layers[i].type=="linear":
                     file_out.write(str(self.layers[i].biases[j])+" ")
                 else:
                     file_out.write(str(self.layers[i].lin.biases[j])+" ")
@@ -613,7 +617,7 @@ class NeuralNet (object):
             file_out.write("* Weights of layer "+str(i)+":\n")
             for j in range(0,self.layers[i].n):
                 for k in range(0,self.layers[i-1].n):
-                    if self.layers[i].type=="Linear":
+                    if self.layers[i].type=="linear":
                         file_out.write(str(self.layers[i].weights[j][k])+" ")
                     else:
                         file_out.write(str(self.layers[i].lin.weights[j][k])+" ")
@@ -641,7 +645,7 @@ class NeuralNet (object):
         line = file_in.readline()
         types = line.split()
         # add layers to network
-        self.add_layer("Input",d[0])
+        self.add_layer("input",d[0])
         for i in range(1,len(d)):
             self.add_layer(types[i],d[i])
         # read biases

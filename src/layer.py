@@ -9,7 +9,7 @@ class Layer (object):
     def __init__(self, n):
         self.n = n
         self.units = np.zeros(n)
-        self.type = "Layer"
+        self.type = "layer"
 
     def activate(self, inputs):
         """
@@ -36,7 +36,7 @@ class Linear (Layer):
         self.mom2_biases = np.zeros(n)
         self.delta_biases = np.zeros(n)
         self.deltas = np.zeros(n)
-        self.type = "Linear"
+        self.type = "linear"
 
     def xavier_init_weights(self):
         """
@@ -136,6 +136,20 @@ class Linear (Layer):
         self.grad_weights.fill(0.0)
         self.grad_biases.fill(0.0)
 
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.grad_weights.fill(0.0)
+        self.mom1_weights.fill(0.0)
+        self.mom2_weights.fill(0.0)
+        self.delta_weights.fill(0.0)
+        self.grad_biases.fill(0.0)
+        self.mom1_biases.fill(0.0)
+        self.mom2_biases.fill(0.0)
+        self.delta_biases.fill(0.0)
+        self.deltas.fill(0.0)
+
     def pick_class(self):
         """
         Return class with highest probability
@@ -160,7 +174,7 @@ class Softmax (Layer):
         if n>1:
             Layer.__init__(self, n)
             self.lin = Linear(n, nprevious)
-            self.type = "Softmax"
+            self.type = "softmax"
         else:
             print "ERROR: Softmax layer cannot have dimension 1!"
             exit(1)
@@ -219,6 +233,12 @@ class Softmax (Layer):
         """
         self.lin.gradient_descent(learning_rate, momentum, batchsize, weight_decay)
 
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.lin.reset_gradients()
+
     def pick_class(self):
         """
         Return class with highest probability
@@ -243,7 +263,7 @@ class Tanh (Layer):
     def __init__(self, n, nprevious):
         Layer.__init__(self, n)
         self.lin = Linear(n, nprevious)
-        self.type = "Tanh"
+        self.type = "tanh"
 
     def xavier_init_weights(self):
         """
@@ -306,6 +326,12 @@ class Tanh (Layer):
         """
         self.lin.gradient_descent(learning_rate, momentum, batchsize, weight_decay)
 
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.lin.reset_gradients()
+
     def pick_class(self):
         """
         Return class with highest probability
@@ -335,7 +361,7 @@ class Sigmoid (Layer):
     def __init__(self, n, nprevious):
         Layer.__init__(self, n)
         self.lin = Linear(n, nprevious)
-        self.type = "Sigmoid"
+        self.type = "sigmoid"
 
     def xavier_init_weights(self):
         """
@@ -396,6 +422,12 @@ class Sigmoid (Layer):
         """
         self.lin.gradient_descent(learning_rate, momentum, batchsize, weight_decay)
 
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.lin.reset_gradients()
+
     def pick_class(self):
         """
         Return class with highest probability
@@ -423,7 +455,7 @@ class SoftSign (Layer):
     def __init__(self, n, nprevious):
         Layer.__init__(self, n)
         self.lin = Linear(n, nprevious)
-        self.type = "SoftSign"
+        self.type = "softsign"
 
     def xavier_init_weights(self):
         """
@@ -485,6 +517,12 @@ class SoftSign (Layer):
         """
         self.lin.gradient_descent(learning_rate, momentum, batchsize, weight_decay)
 
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.lin.reset_gradients()
+
     def pick_class(self):
         """
         Return class with highest probability
@@ -514,7 +552,7 @@ class ReLU (Layer):
     def __init__(self, n, nprevious):
         Layer.__init__(self, n)
         self.lin = Linear(n, nprevious)
-        self.type = "ReLU"
+        self.type = "relu"
 
     def xavier_init_weights(self):
         """
@@ -575,6 +613,12 @@ class ReLU (Layer):
         Update wheights and biases with batch gradient descent (with momentum term)
         """
         self.lin.gradient_descent(learning_rate, momentum, batchsize, weight_decay)
+
+    def reset_gradients(self):
+        """
+        reset gradient variables to zero
+        """
+        self.lin.reset_gradients()
 
     def pick_class(self):
         """
