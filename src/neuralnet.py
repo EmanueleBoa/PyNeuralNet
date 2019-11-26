@@ -360,6 +360,8 @@ class NeuralNet (object):
 
 
     def vector_train_adam(self, vector, target, time):
+        # batch size
+        nbatch = 1
         # produce output
         self.forward_propagation(vector)
         # compute error
