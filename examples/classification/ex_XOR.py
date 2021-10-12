@@ -28,16 +28,16 @@ training_label = np.array(training_label)
 Build Neural network
 """
 net = NeuralNet()
-net.build_network(2,4,1, hidden_type="Tanh", out_type="Sigmoid", scope="Classification", verbose=True)
+net.build_network(2,4,1, hidden_type="tanh", out_type="sigmoid", scope="classification", verbose=True)
 
 """
 Another way of building the same network
 """
 #net = NeuralNet()
-#net.add_layer("Input",2)
-#net.add_layer("Tanh",4)
-#net.add_layer("Sigmoid",1)
-#net.set_scope("Classification")
+#net.add_layer("input",2)
+#net.add_layer("tanh",4)
+#net.add_layer("sigmoid",1)
+#net.set_scope("classification")
 #net.print_network_structure()
 
 """
