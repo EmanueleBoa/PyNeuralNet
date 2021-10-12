@@ -48,7 +48,7 @@ validation_labels = np.array(validation_labels)
 Build Neural network
 """
 net = NeuralNet()
-net.build_network(784,100,10, hidden_type= "Tanh", out_type="Softmax", scope="Classification")
+net.build_network(784,100,10, hidden_type= "tanh", out_type="softmax", scope="classification")
 
 """
 Training
